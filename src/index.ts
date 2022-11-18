@@ -2,17 +2,21 @@
 import { Command } from "commander";
 import playwright from "playwright";
 
-import {
-  PINNED_RULES_POST_HREF,
-  REDDIT_BASE,
-  SUBREDDIT_BASE,
-} from "./constants";
-import { download } from "./download";
-import { scrollToBottom } from "./utils";
+import { DEFAULT_SAVE_LOCATION, PINNED_RULES_POST_HREF } from "./constants";
+import { SubredditPage, PostPage } from "./poms";
 
 const program = new Command();
 
-program.option("-o, --outdir <outdir>", "the directory to save the images to");
+program.option(
+  "-o, --outdir <outdir>",
+  "the directory to save the images to",
+  DEFAULT_SAVE_LOCATION
+);
+
+program.option(
+  "-d, --debug <debug>",
+  "puts the program into debug mode which enables more verbose logging and screenshots on failure"
+);
 
 program.parse(process.argv);
 
@@ -22,48 +26,61 @@ program.parse(process.argv);
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  await page.goto(SUBREDDIT_BASE);
+  const subreddit = new SubredditPage(page);
+  await subreddit.goto();
+  await subreddit.scrollToBottom(); // necessary because reddit lazy loads posts
+  const posts = await subreddit.getPosts();
+  const postCount = await posts.count();
 
-  // Scroll to the bottom of the page (this is necessary because reddit lazy loads images)
-  await scrollToBottom(page);
-
-  const postContainers = page.locator(`[data-testid="post-container"]`);
-  const postCount = await postContainers.count();
+  console.log(`Located ${postCount} posts`);
 
   for (let i = 0; i < postCount; i++) {
-    const post = postContainers.nth(i);
-    const link = post.locator(`a[data-click-id="body"]`);
-    const href = await link.getAttribute("href");
+    console.log(`Processing post ${i + 1} of ${postCount}`);
 
-    if (href == null) {
-      continue;
-    }
+    try {
+      const postId = await subreddit.getPostId(i);
 
-    const detailPageUrl = REDDIT_BASE.concat(href);
-
-    if (!detailPageUrl.includes(PINNED_RULES_POST_HREF)) {
-      await page.goto(detailPageUrl);
-
-      const imageLink = page.locator(
-        `div[data-testid="post-container"] >> div[data-test-id="post-content"] >> a:not([data-click-id="comments"], [data-click-id="user"])`
-      );
-
-      if ((await imageLink.count()) > 1) {
+      // Some postIds are sponsored ads and have a null id, we want to skip those
+      if (postId == null) {
         console.log(
-          `Image ${href} resolved to more than one element. Skipping.`
+          `Post ${postId} was null (this often means this is a sponsored post or an ad).`
         );
 
         continue;
       }
 
-      const src = await imageLink.getAttribute("href");
+      const postPage = new PostPage(page, postId);
 
-      if (src) {
-        await download(src, options.outdir ?? "./imgs");
+      // We also want to skip the pinned rules post that is always stickied at the top
+      if (postPage.url.includes(PINNED_RULES_POST_HREF)) {
+        console.log(`Post ${postId} is this pinned rules post. Skipping.`);
+
+        continue;
       }
 
-      // go back to the subreddit
-      await page.goto(SUBREDDIT_BASE);
+      await postPage.goto();
+
+      // Some posts have two images in rare circumstances, skip those
+      // TODO: figure out why posts resolve to two images (bug)
+      if ((await postPage.getImageCount()) > 1) {
+        console.log(`Post ${postId} contained more than one image. Skipping.`);
+
+        continue;
+      }
+
+      const [imageId] = await postPage.downloadPostImage(options.outdir);
+
+      console.log(
+        `[${i}] Successfully downloaded image for post ${postId} (saved to ${options.outdir}/${imageId})`
+      );
+    } catch (error) {
+      // TODO: find a way to log post id even if this throws
+      console.error(
+        `Encountered the following error while processing post no. ${i}:`,
+        error
+      );
+
+      continue;
     }
   }
 
