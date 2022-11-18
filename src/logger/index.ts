@@ -20,7 +20,10 @@ export function createLogger(options?: LoggerOptions) {
   if (!quiet) {
     defaultLogger.add(
       new winston.transports.Console({
-        format: winston.format.simple(),
+        format: winston.format.combine(
+          winston.format.colorize(),
+          winston.format.simple()
+        ),
       })
     );
   }
