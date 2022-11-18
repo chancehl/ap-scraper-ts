@@ -2,12 +2,12 @@
 import { Command } from "commander";
 import playwright from "playwright";
 
-import { download } from "./download";
 import {
   PINNED_RULES_POST_HREF,
   REDDIT_BASE,
   SUBREDDIT_BASE,
 } from "./constants";
+import { download } from "./download";
 import { scrollToBottom } from "./utils";
 
 const program = new Command();
@@ -47,6 +47,14 @@ program.parse(process.argv);
       const imageLink = page.locator(
         `div[data-testid="post-container"] >> div[data-test-id="post-content"] >> a:not([data-click-id="comments"], [data-click-id="user"])`
       );
+
+      if ((await imageLink.count()) > 1) {
+        console.log(
+          `Image ${href} resolved to more than one element. Skipping.`
+        );
+
+        continue;
+      }
 
       const src = await imageLink.getAttribute("href");
 
