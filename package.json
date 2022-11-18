@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "esbuild ./src/index.ts --bundle --outfile=./dist/index.js --platform=node",
-    "build:watch": "esbuild ./src/index.ts --bundle --outfile=./dist/index.js --platform=node --watch",
+    "build:watch": "npm run build -- --watch",
     "exec": "node ./dist/index.js",
     "prebuild": "rm -rf ./dist",
     "preexec": "npm run build"
