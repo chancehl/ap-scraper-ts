@@ -29,10 +29,6 @@ export class PostPage {
     return await this.image.count();
   }
 
-  async getImageDownloadUrl() {
-    return;
-  }
-
   async downloadPostImage(dir: string) {
     const cdnUrl = await this.image.getAttribute("href");
 
