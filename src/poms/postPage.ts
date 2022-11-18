@@ -29,6 +29,12 @@ export class PostPage {
     return await this.image.count();
   }
 
+  async is18Plus() {
+    const nsfwWarning = this.page.getByText("Log in to confirm you're over 18");
+
+    return await nsfwWarning.isVisible();
+  }
+
   async downloadPostImage(dir: string) {
     const cdnUrl = await this.image.getAttribute("href");
 

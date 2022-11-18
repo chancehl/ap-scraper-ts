@@ -20,7 +20,7 @@ program.option(
   false
 );
 
-program.option("-q, --quiet <quiet>", "disables console logging", false);
+program.option("-q, --quiet", "disables console logging", false);
 
 program.parse(process.argv);
 
@@ -75,17 +75,34 @@ program.parse(process.argv);
         continue;
       }
 
+      // some of the art contains nudity and will be flagged for 18+ accounts
+      if (await postPage.is18Plus()) {
+        logger.warn(`Encountered 18+ image for post ${postId}. Skipping.`);
+
+        await page.goBack();
+
+        continue;
+      }
+
       const [imageId] = await postPage.downloadPostImage(options.outdir);
 
       logger.info(
-        `[${i}] Successfully downloaded image for post ${postId} (saved to ${options.outdir}/${imageId})`
+        `Successfully downloaded image for post ${postId} (saved to ${options.outdir}/${imageId})`
       );
+
+      await page.goBack();
     } catch (error) {
       // TODO: find a way to log post id even if this throws
       logger.error(
         `Encountered the following error while processing post no. ${i}:`,
         error
       );
+
+      if (options.debug) {
+        await page.screenshot({ path: "./debug/foo.jpg" });
+      }
+
+      await page.goBack();
 
       continue;
     }
