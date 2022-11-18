@@ -89,8 +89,6 @@ program.parse(process.argv);
       logger.info(
         `Successfully downloaded image for post ${postId} (saved to ${options.outdir}/${imageId})`
       );
-
-      await page.goBack();
     } catch (error) {
       // TODO: find a way to log post id even if this throws
       logger.error(
@@ -102,9 +100,9 @@ program.parse(process.argv);
         await page.screenshot({ path: "./debug/foo.jpg" });
       }
 
-      await page.goBack();
-
       continue;
+    } finally {
+      await page.goBack();
     }
   }
 
