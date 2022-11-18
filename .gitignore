@@ -1,7 +1,15 @@
 node_modules
+
+# compiled code
 dist
+
 # default img dir
 imgs
+
+# logs
 logs
 combined.log
 error.log
+
+# debug
+debug
