@@ -15,7 +15,8 @@ program.option(
 
 program.option(
   "-d, --debug <debug>",
-  "puts the program into debug mode which enables more verbose logging and screenshots on failure"
+  "puts the program into debug mode which enables more verbose logging and screenshots on failure",
+  false
 );
 
 program.parse(process.argv);
