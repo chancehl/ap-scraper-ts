@@ -15,7 +15,7 @@ program.option(
 );
 
 program.option(
-  "-d, --debug <debug>",
+  "-d, --debug",
   "puts the program into debug mode which enables more verbose logging and screenshots on failure",
   false
 );
