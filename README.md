@@ -1,3 +1,4 @@
+```
 Usage: index [options]
 
 Options:
@@ -6,3 +7,4 @@ Options:
                          false)
   -q, --quiet            disables console logging (default: false)
   -h, --help             display help for command
+  ```
