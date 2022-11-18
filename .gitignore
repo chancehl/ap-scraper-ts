@@ -2,3 +2,6 @@ node_modules
 dist
 # default img dir
 imgs
+logs
+combined.log
+error.log
