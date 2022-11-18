@@ -1,14 +1,11 @@
 import winston from "winston";
 
-type LoggerOptions = {
-  quiet?: boolean;
-};
+type LoggerOptions = { quiet?: boolean };
 
 export function createLogger(options?: LoggerOptions) {
   const defaultLogger = winston.createLogger({
     level: "info",
     format: winston.format.combine(
-      winston.format.colorize(),
       winston.format.timestamp(),
       winston.format.json()
     ),
