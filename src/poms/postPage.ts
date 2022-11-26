@@ -4,7 +4,7 @@ import Axios from "axios";
 import path from "path";
 import fs from "fs";
 
-import { REDDIT_URL, RESOLUTION_REGEX } from "../constants";
+import { REDDIT_URL, RESOLUTION_REGEX, YEAR_REGEX } from "../constants";
 
 export class PostPage {
   readonly page: Page;
@@ -50,7 +50,13 @@ export class PostPage {
         .map((chunk) => chunk.replace(/\D/gm, ""));
     }
 
-    return { title, resolution: { x, y } };
+    let [year] = YEAR_REGEX.exec(title) ?? [];
+
+    if (year != null) {
+      year = year.replace(/\D/gm, "");
+    }
+
+    return { title, year, resolution: { x, y } };
   }
 
   async downloadPostImage(dir: string) {

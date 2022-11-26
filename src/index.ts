@@ -4,7 +4,8 @@ import playwright from "playwright";
 
 import { SubredditPage, PostPage } from "./poms";
 import { createLogger } from "./logger";
-import { ImageMetadata, ReportService } from "./services";
+import { ReportService } from "./services";
+import { ImageMetadata } from "./types";
 import {
   DEFAULT_SAVE_LOCATION,
   DEFAULT_REPORT_LOCATION,
@@ -115,7 +116,11 @@ program.parse(process.argv);
 
       const metadata = await postPage.parseImageMetadata();
 
-      results.push({ ...metadata, outdir: options.outdir });
+      results.push({
+        ...metadata,
+        outdir: options.outdir,
+        location: `${options.outdir}/${imageId}`,
+      });
 
       logger.info(
         `Successfully downloaded image for post ${postId} (saved to ${

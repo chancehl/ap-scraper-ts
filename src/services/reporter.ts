@@ -1,13 +1,9 @@
 import fs from "fs";
 
+import { ImageMetadata } from "../types";
+
 type ReportServiceConstructorArgs = {
   outdir?: string;
-};
-
-export type ImageMetadata = {
-  title: string;
-  outdir: string;
-  resolution?: { x: number; y: number };
 };
 
 export class ReportService {
@@ -24,7 +20,7 @@ export class ReportService {
     // write to file
     fs.writeFileSync(
       `${this.outdir}/${new Date().toISOString()}-report.json`,
-      JSON.stringify(results),
+      JSON.stringify(results, null, 4),
       { flag: "wx" }
     );
   }

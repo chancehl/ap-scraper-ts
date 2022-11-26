@@ -10,8 +10,6 @@ export class SubredditPage {
   constructor(page: Page) {
     this.page = page;
     this.posts = page.locator(`[data-testid="post-container"]`);
-
-    this.page.setDefaultTimeout(7500);
   }
 
   async goto() {
