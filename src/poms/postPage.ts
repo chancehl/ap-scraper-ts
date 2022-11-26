@@ -48,8 +48,6 @@ export class PostPage {
         .toLowerCase()
         .split("x")
         .map((chunk) => chunk.replace(/\D/gm, ""));
-
-      console.log({ x, y });
     }
 
     return { title, resolution: { x, y } };

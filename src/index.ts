@@ -26,6 +26,11 @@ program.option(
 );
 
 program.option(
+  "-n, --numImages <numImages>",
+  "the maximum number of images to scrape"
+);
+
+program.option(
   "-d, --debug",
   "puts the program into debug mode which enables more verbose logging and screenshots on failure",
   false
@@ -53,9 +58,11 @@ program.parse(process.argv);
   const posts = await subreddit.getPosts();
   const postCount = await posts.count();
 
+  const maxImages = options.numImages ?? postCount;
+
   logger.info(`Located ${postCount} posts`);
 
-  for (let i = 0; i < postCount; i++) {
+  for (let i = 0; i < maxImages; i++) {
     try {
       const isPromotedPost = await subreddit.isPromotedPost(i);
 
