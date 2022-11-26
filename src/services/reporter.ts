@@ -13,7 +13,7 @@ export class ReportService {
     this.outdir = outdir ?? "./report";
   }
 
-  async writeReportToDisk(results: ImageMetadata[]): Promise<void> {
+  writeReportToDisk(results: ImageMetadata[]) {
     // if outdir doesn't exist, create it
     fs.mkdirSync(this.outdir, { recursive: true });
 

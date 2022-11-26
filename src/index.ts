@@ -145,7 +145,7 @@ program.parse(process.argv);
   }
 
   // Report
-  await reporter.writeReportToDisk(results);
+  reporter.writeReportToDisk(results);
 
   // Teardown
   await context.close();
