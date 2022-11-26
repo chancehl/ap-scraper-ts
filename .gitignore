@@ -6,6 +6,9 @@ dist
 # default img dir
 imgs
 
+# default report dir
+report
+
 # logs
 logs
 combined.log

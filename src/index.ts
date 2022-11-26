@@ -2,9 +2,14 @@
 import { Command } from "commander";
 import playwright from "playwright";
 
-import { DEFAULT_SAVE_LOCATION, PINNED_RULES_POST_HREF } from "./constants";
 import { SubredditPage, PostPage } from "./poms";
 import { createLogger } from "./logger";
+import { ImageMetadata, ReportService } from "./services";
+import {
+  DEFAULT_SAVE_LOCATION,
+  DEFAULT_REPORT_LOCATION,
+  PINNED_RULES_POST_HREF,
+} from "./constants";
 
 const program = new Command();
 
@@ -12,6 +17,12 @@ program.option(
   "-o, --outdir <outdir>",
   "the directory to save the images to",
   DEFAULT_SAVE_LOCATION
+);
+
+program.option(
+  "-r, --reportDir <reportDir>",
+  "the directory to save the images to",
+  DEFAULT_REPORT_LOCATION
 );
 
 program.option(
@@ -27,6 +38,9 @@ program.parse(process.argv);
 (async function main(options) {
   // Setup
   const logger = createLogger({ quiet: options.quiet });
+  const reporter = new ReportService({ outdir: "./report" });
+
+  let results: ImageMetadata[] = [];
 
   const browser = await playwright.chromium.launch();
   const context = await browser.newContext();
@@ -41,7 +55,7 @@ program.parse(process.argv);
 
   logger.info(`Located ${postCount} posts`);
 
-  for (let i = 0; i < postCount; i++) {
+  for (let i = 0; i < 2; i++) {
     try {
       const isPromotedPost = await subreddit.isPromotedPost(i);
 
@@ -92,8 +106,14 @@ program.parse(process.argv);
 
       const [imageId] = await postPage.downloadPostImage(options.outdir);
 
+      const metadata = await postPage.parseImageMetadata();
+
+      results.push({ ...metadata, outdir: options.outdir });
+
       logger.info(
-        `Successfully downloaded image for post ${postId} (saved to ${options.outdir}/${imageId})`
+        `Successfully downloaded image for post ${postId} (saved to ${
+          options.outdir
+        }/${imageId}, metadata=${JSON.stringify(metadata)})`
       );
     } catch (error) {
       // TODO: find a way to log post id even if this throws
@@ -103,7 +123,7 @@ program.parse(process.argv);
       );
 
       if (options.debug) {
-        await page.screenshot({ path: `./debug/$failure-{i}.jpg` });
+        await page.screenshot({ path: `./debug/failure-${i}.jpg` });
       }
 
       continue;
@@ -111,6 +131,9 @@ program.parse(process.argv);
       await subreddit.goto();
     }
   }
+
+  // Report
+  await reporter.writeReportToDisk(results);
 
   // Teardown
   await context.close();

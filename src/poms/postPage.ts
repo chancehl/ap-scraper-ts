@@ -4,7 +4,7 @@ import Axios from "axios";
 import path from "path";
 import fs from "fs";
 
-import { REDDIT_URL } from "../constants";
+import { REDDIT_URL, RESOLUTION_REGEX } from "../constants";
 
 export class PostPage {
   readonly page: Page;
@@ -33,6 +33,26 @@ export class PostPage {
     const nsfwWarning = this.page.getByText("Log in to confirm you're over 18");
 
     return await nsfwWarning.isVisible();
+  }
+
+  async parseImageMetadata() {
+    const title = await this.page.locator("h1").innerHTML();
+
+    let [resolution] = RESOLUTION_REGEX.exec(title) ?? [];
+
+    // TODO: this is fragile at best. refactor so we don't have to use the string magic
+    let x, y;
+
+    if (resolution != null) {
+      [x, y] = resolution
+        .toLowerCase()
+        .split("x")
+        .map((chunk) => chunk.replace(/\D/gm, ""));
+
+      console.log({ x, y });
+    }
+
+    return { title, resolution: { x, y } };
   }
 
   async downloadPostImage(dir: string) {
