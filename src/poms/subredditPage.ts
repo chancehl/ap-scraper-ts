@@ -10,6 +10,8 @@ export class SubredditPage {
   constructor(page: Page) {
     this.page = page;
     this.posts = page.locator(`[data-testid="post-container"]`);
+
+    this.page.setDefaultTimeout(7500);
   }
 
   async goto() {
@@ -20,16 +22,27 @@ export class SubredditPage {
     return this.posts;
   }
 
+  async isPromotedPost(n: number) {
+    return this.posts
+      .nth(n)
+      .locator("span", { hasText: "promoted" })
+      .isVisible();
+  }
+
   async getPostId(n: number) {
-    const a = this.posts.nth(n).locator(`a[data-click-id="body"]`);
+    try {
+      const a = this.posts.nth(n).locator(`a[data-click-id="body"]`);
 
-    const href = await a.getAttribute("href");
+      const href = await a.getAttribute("href");
 
-    if (href == null) {
-      throw new Error("Could not get href for post ${n}");
+      if (href == null) {
+        return null;
+      }
+
+      return href;
+    } catch (err) {
+      return null;
     }
-
-    return href;
   }
 
   async scrollToBottom() {

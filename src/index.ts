@@ -42,15 +42,21 @@ program.parse(process.argv);
   logger.info(`Located ${postCount} posts`);
 
   for (let i = 0; i < postCount; i++) {
-    logger.info(`Processing post ${i + 1} of ${postCount}`);
-
     try {
+      const isPromotedPost = await subreddit.isPromotedPost(i);
+
+      if (isPromotedPost) {
+        logger.warn(`Post ${i} is a promoted post. Skipping.`);
+
+        continue;
+      }
+
       const postId = await subreddit.getPostId(i);
 
       // Some postIds are sponsored ads and have a null id, we want to skip those
       if (postId == null) {
         logger.warn(
-          `Post ${postId} was null (this often means this is a sponsored post or an ad).`
+          `Post ${i} was null (this often means this is an advertisement).`
         );
 
         continue;
@@ -97,12 +103,12 @@ program.parse(process.argv);
       );
 
       if (options.debug) {
-        await page.screenshot({ path: "./debug/foo.jpg" });
+        await page.screenshot({ path: `./debug/$failure-{i}.jpg` });
       }
 
       continue;
     } finally {
-      await page.goBack();
+      await subreddit.goto();
     }
   }
 
