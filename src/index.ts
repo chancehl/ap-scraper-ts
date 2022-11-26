@@ -55,7 +55,7 @@ program.parse(process.argv);
 
   logger.info(`Located ${postCount} posts`);
 
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < postCount; i++) {
     try {
       const isPromotedPost = await subreddit.isPromotedPost(i);
 
