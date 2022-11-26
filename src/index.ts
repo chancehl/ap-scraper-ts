@@ -61,7 +61,9 @@ program.parse(process.argv);
 
   const maxImages = options.numImages ?? postCount;
 
-  logger.info(`Located ${postCount} posts`);
+  logger.info(
+    `Located ${postCount} posts. Crawler will attempt to scrape ${maxImages} of them (if you wish to scrape all images, please omit the -n/--numImages flag).`
+  );
 
   for (let i = 0; i < maxImages; i++) {
     try {
