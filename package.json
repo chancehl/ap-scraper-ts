@@ -6,9 +6,12 @@
   "scripts": {
     "build": "esbuild ./src/index.ts --bundle --outfile=./dist/index.js --platform=node",
     "build:watch": "npm run build -- --watch",
+    "clean": "rm -rf ./debug && rm -rf ./report && rm -rf ./*.log",
     "exec": "node ./dist/index.js",
+    "package": "pkg ./src/index.ts --out-path ./bin",
     "prebuild": "rm -rf ./dist",
-    "preexec": "npm run build"
+    "preexec": "npm run build",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +20,9 @@
     "@types/commander": "^2.12.2",
     "@types/node": "^18.11.9",
     "esbuild": "^0.15.14",
-    "typescript": "^4.9.3"
+    "pkg": "^5.8.0",
+    "typescript": "^4.9.3",
+    "husky": "^8.0.0"
   },
   "dependencies": {
     "axios": "^1.1.3",
